@@ -1,43 +1,33 @@
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.crypto.dsig.keyinfo.PGPData;
-
 public class Graph {
 
 	private int nNodes;
-	private LinkedList<Node> graph;
+	private Node[] graph;
 
 	public Graph(int nNodes) {
 		// TODO Auto-generated constructor stub
 		this.nNodes = nNodes;
-		graph = new LinkedList<Node>();
+		graph = new Node[nNodes];
 
 	}
 
-	void addEdge(int orign, int destination) {
-		if (graph.get(orign) == null) {
-			graph.add(new Node(orign));
-		}
-		if (graph.get(destination) == null) {
-			graph.add(new Node(destination));
-		}
-
-		graph.get(destination).addDegree();
-		graph.get(orign).addSon(graph.get(destination));
+	void addEdge(Node value, Node destination) {
+		graph[destination.getValue()].addDegree();
+		graph[value.getValue()].addSon(destination);
 	}
 
-	void removeEdge(int orign, int destination) {
-		graph.get(orign).removeSon(destination);
-
+	void removeEdge(Node orign, Node destination) {
+		graph[orign.getValue()].removeSon(destination);
 	}
 
-	public LinkedList<Node> getNodes() {
+	public Node[] getNodes() {
 		return graph;
 	}
 
-	public LinkedList<Node> getNodeSons(int n) {
-		return graph.get(n).getSons();
+	public LinkedList<Node> getNodeSons(Node n) {
+		return graph[n.getValue()].getSons();
 	}
 
 	boolean isAcyclic(Graph g) {
@@ -55,7 +45,7 @@ public class Graph {
 		while (!ready.isEmpty()) {
 			Node node = ready.remove();
 			numProcNodes++;
-			for (Node v : g.getNodeSons(node.getValue())) {
+			for (Node v : g.getNodeSons(node)) {
 				inDegree[v.getValue()]--;
 				if (inDegree[v.getValue()] == 0)
 					ready.add(v);

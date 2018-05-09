@@ -14,8 +14,8 @@ public class Node {
 	public void  addSon(Node son) {
 		sons.add(son);
 	}
-	public void removeSon(int son) {
-		sons.remove(son);
+	public void removeSon(Node son) {
+		sons.remove(son.getValue());
 	}
 	public LinkedList<Node> getSons(){
 		return sons;
