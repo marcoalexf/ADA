@@ -1,47 +1,62 @@
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 public class GraphMap {
-	
-	Map<String, ArrayList<String>> graph;
-	Map<String, Boolean> nodes;
-	boolean cycleDetected = false;
-	
+
+	Map<String, HashSet<String>> graph;
+
 	public GraphMap() {
-		this.graph = new HashMap<String, ArrayList<String>>();
-		this.nodes = new HashMap<String, Boolean>();
+		this.graph = new HashMap<String, HashSet<String>>();
 	}
 
-	
+
 	public void addSon(String father, String son) {
-		if(!this.graph.containsKey(father)) {
-			addNode(father);
-		}
-		else
-			this.graph.get(father).add(son);
+		this.graph.get(father).add(son);
 	}
-	
+
+
 	public void addNode(String node) {
-		this.graph.put(node, new ArrayList<String>());
-		this.nodes.put(node, false);
+		this.graph.putIfAbsent(node, new HashSet<String>());
 	}
-	
+
 	public boolean hasCycle() {
-		Stack<String> checked = new Stack<String>();
-		
-		this.graph.keySet().forEach((n) -> {
-			if(!this.nodes.get(n)) {
-				this.nodes.put(n, true);
-				if(checked.contains(n)) {
-					this.cycleDetected = true;
-					return;
-				}else {
-					checked.push(n);
-				}
+		Stack<String> visited = new Stack<String>();
+
+		for(String node : this.graph.keySet()) {
+			if(hasCycle(node, visited)) {
+				return true;
 			}
-		});
-		return this.cycleDetected;
+		}
+
+		return false;
+	}
+
+	private boolean hasCycle(String node, Stack<String> visited) {
+
+		if (visited.contains(node)) {
+			return true;
+		}
+		visited.add(node);
+
+		for (String nextNode : this.graph.get(node)) {
+			if (hasCycle(nextNode, visited)) {
+				return true;
+			}
+		}
+
+		visited.pop();
+		return false;
+	}
+
+
+	public Set<String> getNodes(){
+		return this.graph.keySet();
+	}
+
+	public HashSet<String> getSons(String node){
+		return this.graph.get(node);
 	}
 }
