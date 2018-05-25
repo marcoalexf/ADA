@@ -7,11 +7,20 @@ public class Problem {
 
 	String [][] map;
 	int w, h;
+	int lamp_check [][];
+	int gen;
+	Queue<State> explored = new LinkedList<>();
 
 	public Problem(String [][] map, int w, int h) {
 		this.map = map;
 		this.w = w - 1;
 		this.h = h - 1;
+		this.lamp_check = new int [h][w];
+		for(int i = 0; i < h; i++)
+			for(int j = 0; j < w; j++)
+				this.lamp_check[i][j] = -1;
+		
+		this.gen = 0;
 	}
 
 	public boolean isLit(int x, int y, int dx, int dy) {
@@ -63,13 +72,12 @@ public class Problem {
 	}
 
 	public boolean isDestiny(State s) {
+		//System.out.println(s.getX() + " ; " + s.getY());
 		return s.getX() == w && s.getY() == h;
 	}
 
 	public State solve() throws Exception {
 		State initial = new State(0,0,0,0);
-
-		Queue<State> explored = new LinkedList<>();
 
 		explored.add(initial);
 
@@ -84,6 +92,8 @@ public class Problem {
 				return explored.poll();
 
 			explored.addAll(generate(explored.poll()));
+			this.gen=explored.size();
+			//System.out.println(this.gen);
 		}
 
 		throw new Exception();
@@ -92,40 +102,93 @@ public class Problem {
 	public List<State> generate(State s){
 		List<State> generated = new ArrayList<>();
 
+		//if its destiny, return
+
+		if(isDestiny(s)) {
+			generated.add(s);
+			return generated;
+		}
+
 		//is the current lantern better then mine?
-		if(!map[s.getY()][s.getX()].equals("0") && !map[s.getY()][s.getX()].equals("*"))
-			if(Integer.parseInt(map[s.getY()][s.getX()]) > s.getL())
+		if(!map[s.getY()][s.getX()].equals("0") && !map[s.getY()][s.getX()].equals("*")) {
+			if(Integer.parseInt(map[s.getY()][s.getX()]) > s.getL()) {
 				s.setL(Integer.parseInt(map[s.getY()][s.getX()]));
+			}
+		}
 
 		// move up
-		if(s.getY() - 1 >= 0)
-			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() - 1))
-				generated.add(new State(s.getX(), s.getY() - 1, s.getL(), s.getD() + 1));
-			else if(s.getL() > 0)
-				generated.add(new State(s.getX(), s.getY() - 1, s.getL() - 1, s.getD() + 1));
+		if(s.getY() - 1 >= 0) {
+			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() - 1)) {
+				if(s.getL() > lamp_check[s.getY() - 1][s.getX()]) {
+					State q = new State(s.getX(), s.getY() - 1, s.getL(), s.getD() + 1); 
+					generated.add(q);
+					this.lamp_check[s.getY() - 1][s.getX()] = s.getL();
+				}
+			}
+			else if(s.getL() > 0) {
+				if(s.getL() > lamp_check[s.getY() - 1][s.getX()]) {
+					State q = new State(s.getX(), s.getY() - 1, s.getL() - 1, s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY() - 1][s.getX()] = s.getL();
+				}
+			}
+		}
 
 		// move down
-		if(s.getY() + 1 <= h)
-			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() + 1))
-				generated.add(new State(s.getX(), s.getY() + 1, s.getL(), s.getD() + 1));
-			else if(s.getL() > 0)
-				generated.add(new State(s.getX(), s.getY() + 1, s.getL() - 1, s.getD() + 1));
+		if(s.getY() + 1 <= h) {
+			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() + 1)) {
+				if(s.getL() > lamp_check[s.getY() + 1][s.getX()]) {		
+					State q = new State(s.getX(), s.getY() + 1, s.getL(), s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY() + 1][s.getX()] = s.getL();
+				}
+			}else if(s.getL() > 0) {
+				if(s.getL() > lamp_check[s.getY() + 1][s.getX()]) {					
+					State q = new State(s.getX(), s.getY() + 1, s.getL() - 1, s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY() + 1][s.getX()] = s.getL();
+				}
+			}
+		}
 
 		// move left
-		if(s.getX() - 1 >= 0)
-			if(isLit(s.getX(), s.getY(), s.getX() - 1, s.getY()))
-				generated.add(new State(s.getX() - 1, s.getY(), s.getL(), s.getD() + 1));
-			else if(s.getL() > 0)
-				generated.add(new State(s.getX() - 1, s.getY(), s.getL() - 1, s.getD() + 1));
+		if(s.getX() - 1 >= 0) {
+			if(isLit(s.getX(), s.getY(), s.getX() - 1, s.getY())) {
+				if(s.getL() > lamp_check[s.getY()][s.getX() - 1]) {
+					State q = new State(s.getX() - 1, s.getY(), s.getL(), s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY()][s.getX() - 1] = s.getL();
+				}
+			}else if(s.getL() > 0) {
+				if(s.getL() > lamp_check[s.getY()][s.getX() - 1]) {					
+					State q = new State(s.getX() - 1, s.getY(), s.getL() - 1, s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY()][s.getX() - 1] = s.getL();
+				}
+			}
+		}
 
 
-		// move rigth
-		if(s.getX() + 1 <= w)
-			if(isLit(s.getX(), s.getY(), s.getX() + 1, s.getY()))
-				generated.add(new State(s.getX() + 1, s.getY(), s.getL(), s.getD() + 1));
-			else if(s.getL() > 0)
-				generated.add(new State(s.getX() + 1, s.getY(), s.getL() - 1, s.getD() + 1));	
-
+		// move right
+		if(s.getX() + 1 <= w) {
+			if(isLit(s.getX(), s.getY(), s.getX() + 1, s.getY())) {
+				if(s.getL() > lamp_check[s.getY()][s.getX() + 1]) {	
+					State q = new State(s.getX() + 1, s.getY(), s.getL(), s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY()][s.getX() + 1] = s.getL();
+				}
+			}else if(s.getL() > 0) {
+				if(s.getL() > lamp_check[s.getY()][s.getX() + 1]) {					
+					State q = new State(s.getX() + 1, s.getY(), s.getL() - 1, s.getD() + 1);
+					generated.add(q);
+					this.lamp_check[s.getY()][s.getX() + 1] = s.getL();
+				}
+			}	
+		}
 		return generated;
+	}
+
+	public int getGeneratedStates() {
+		return this.gen;
 	}
 }

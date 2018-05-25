@@ -19,19 +19,18 @@ public class Main {
 		for(int i = 0; i < h; i++) {
 			String params [] = input.readLine().split(" ");
 			for(int k = 0; k < w; k++) {
-				map[i][k] = params[k]; // reverse it so the matrix does x THEN y
+				map[i][k] = params[k];
 			}
 		}
 		
 		Problem p = new Problem(map, w ,h);
+		
 		
 		try {
 			System.out.println(p.solve().getD());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		//System.out.println("At " + map[4][3] + " (3, 4), is there a light? ->" + p.isLit(3, 4));
 	}
 
 }
