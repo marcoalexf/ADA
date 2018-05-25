@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class Problem {
 
@@ -10,6 +12,13 @@ public class Problem {
 		this.map = map;
 		this.w = w - 1;
 		this.h = h - 1;
+	}
+
+	public boolean isLit(int x, int y, int dx, int dy) {
+		if(map[y][x].equals("*") || map[dy][dx].equals("*"))
+			return true;
+
+		return false;
 	}
 
 	public boolean isLit(int x, int y) {
@@ -50,55 +59,73 @@ public class Problem {
 	}
 
 	public boolean isDestiny(int x, int y) {
-		return x == w - 1 && y == h - 1;
-	}
-	
-	public void generateStates() {
-		State initial = new State(0, 0, 0, 0);
-		List<State> state_list = new ArrayList<State>();
-		
-		solve(map, initial, state_list);
-		
-		//return solve(map, initial).getD();
+		return x == w && y == h;
 	}
 
-	public int solve(String [][] map, State s, List<State> state_list) {
-		// lets where he can walk
-		
-		if(isDestiny(s.getX(), s.getY()))
-			return s.getD();
-		
-		// generate new states and recursion on top of them mofos
-		
-		//first lets see where we can walk
-		
-		state_list.add(s);
-		if(s.getX() - 1 > 0) { // can go left
-			// is left lit?
-			if(isLit(s.getX() - 1, s.getY()))
-				solve(map, new State(s.getX()-1, s.getY(), s.getL(), s.getD()+1), state_list);
-			else if(s.getL() > 0) // does he have a lantern? then he can go, but uses lantern
-				solve(map, new State(s.getX()-1, s.getY(), s.getL() - 1, s.getD()+1), state_list);
+	public boolean isDestiny(State s) {
+		return s.getX() == w && s.getY() == h;
+	}
+
+	public State solve() throws Exception {
+		State initial = new State(0,0,0,0);
+
+		Queue<State> explored = new LinkedList<>();
+
+		explored.add(initial);
+
+		return solve(explored);
+	}
+
+	public State solve(Queue<State> explored) throws Exception {
+
+		//generate and put in explored
+		while(!explored.isEmpty()) {
+			if(isDestiny(explored.peek()))
+				return explored.poll();
+
+			explored.addAll(generate(explored.poll()));
 		}
-		if(s.getX() + 1 < w) { // can go right
-			if(isLit(s.getX() + 1, s.getY()))
-				solve(map, new State(s.getX()+1, s.getY(), s.getL(), s.getD()+1), state_list);
+
+		throw new Exception();
+	}
+
+	public List<State> generate(State s){
+		List<State> generated = new ArrayList<>();
+
+		//is the current lantern better then mine?
+		if(!map[s.getY()][s.getX()].equals("0") && !map[s.getY()][s.getX()].equals("*"))
+			if(Integer.parseInt(map[s.getY()][s.getX()]) > s.getL())
+				s.setL(Integer.parseInt(map[s.getY()][s.getX()]));
+
+		// move up
+		if(s.getY() - 1 >= 0)
+			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() - 1))
+				generated.add(new State(s.getX(), s.getY() - 1, s.getL(), s.getD() + 1));
 			else if(s.getL() > 0)
-				solve(map, new State(s.getX()+1, s.getY(), s.getL() - 1, s.getD()+1), state_list);
-		}
-		if(s.getY() - 1 > 0) { // can go up
-			if(isLit(s.getX(), s.getY() - 1))
-				solve(map, new State(s.getX(), s.getY() - 1, s.getL(), s.getD()+1), state_list);
+				generated.add(new State(s.getX(), s.getY() - 1, s.getL() - 1, s.getD() + 1));
+
+		// move down
+		if(s.getY() + 1 <= h)
+			if(isLit(s.getX(), s.getY(), s.getX(), s.getY() + 1))
+				generated.add(new State(s.getX(), s.getY() + 1, s.getL(), s.getD() + 1));
 			else if(s.getL() > 0)
-				solve(map, new State(s.getX(), s.getY() - 1, s.getL() - 1, s.getD()+1), state_list);
-		}
-		if(s.getY() + 1 < h) { // can go up
-			if(isLit(s.getX(), s.getY() + 1))
-				solve(map, new State(s.getX(), s.getY() + 1, s.getL(), s.getD()+1), state_list);
+				generated.add(new State(s.getX(), s.getY() + 1, s.getL() - 1, s.getD() + 1));
+
+		// move left
+		if(s.getX() - 1 >= 0)
+			if(isLit(s.getX(), s.getY(), s.getX() - 1, s.getY()))
+				generated.add(new State(s.getX() - 1, s.getY(), s.getL(), s.getD() + 1));
 			else if(s.getL() > 0)
-				solve(map, new State(s.getX(), s.getY() + 1, s.getL() - 1, s.getD()+1), state_list);
-		}
-		
-		s.getD();
+				generated.add(new State(s.getX() - 1, s.getY(), s.getL() - 1, s.getD() + 1));
+
+
+		// move rigth
+		if(s.getX() + 1 <= w)
+			if(isLit(s.getX(), s.getY(), s.getX() + 1, s.getY()))
+				generated.add(new State(s.getX() + 1, s.getY(), s.getL(), s.getD() + 1));
+			else if(s.getL() > 0)
+				generated.add(new State(s.getX() + 1, s.getY(), s.getL() - 1, s.getD() + 1));	
+
+		return generated;
 	}
 }

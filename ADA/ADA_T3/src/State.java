@@ -7,6 +7,7 @@ public class State {
 		this.x = x;
 		this.y = y;
 		this.l = l;
+		this.d = d;
 	}
 
 	public int getX() {
@@ -23,5 +24,9 @@ public class State {
 	
 	public int getD() {
 		return this.d;
+	}
+	
+	public void setL(int l) {
+		this.l = l;
 	}
 }

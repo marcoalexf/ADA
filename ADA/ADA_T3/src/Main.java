@@ -24,8 +24,14 @@ public class Main {
 		}
 		Problem p = new Problem(map, w ,h);
 		
+		try {
+			System.out.println(p.solve().getD());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		System.out.println("At " + map[4][3] + " (3, 4), is there a light? ->" + p.isLit(3, 4));
+		//System.out.println("At " + map[4][3] + " (3, 4), is there a light? ->" + p.isLit(3, 4));
 	}
 
 }
